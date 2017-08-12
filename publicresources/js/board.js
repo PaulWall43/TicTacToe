@@ -20,27 +20,51 @@ function Board(p1, p2){
 			//Input boolean into array 
 			this.arr[numSpotId] = this.playerTurn;
 		},
-		updateBoardUI:function(spotId){
-			if(this.playerTurn){
-				document.getElementById(spotId).innerHTML = 'X';
-			} else {
-				document.getElementById(spotId).innerHTML = 'O';
+		updateBoardUI:function(){
+			for(var i = 0; i < this.arr.length; i++){
+				if(this.arr[i]){
+					document.getElementById(i.toString()).innerHTML = 'X';
+				} else if(this.arr[i] === false) {
+					document.getElementById(i.toString()).innerHTML = 'O';
+				}
 			}
+			
 		},
-		processMove: function(cell){
+		processBoard: function(){
 			// alert('Click was detected on board ' + id);
-			if(!this.checkValidClick(parseInt(cell))){
-				console.log('INVALID CLICK');
-				return;
-			}
-			this.updateBoardArray(parseInt(cell));
-			this.updateBoardUI(cell);
+			// if(!this.checkValidClick(parseInt(cell))){
+			// 	console.log('INVALID CLICK');
+			// 	return;
+			// }
+			// this.updateBoardArray(parseInt(cell));
+			this.updateBoardUI();
 			if(this.checkWin()){
+				alert('was a win');
 				this.declareWinner();
 				this.clearArr();
 				this.clearBoardUI();
-				this.updatePlayerScore();
-				this.resetPlayerTurn();
+				// this.updatePlayerScore();
+				// this.resetPlayerTurn();
+				var xmlHttp = new XMLHttpRequest();
+				xmlHttp.open("POST", "http://localhost:8080/playerwin", true);
+				// if(!playerTurn)
+				// 	xmlHttp.open("POST", "http://localhost:8080/playeronewin", true);
+				// else 
+				// 	xmlHttp.open("POST", "http://localhost:8080/playertwowin", true);
+				xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				that = this;
+				xmlHttp.onreadystatechange = function(){
+					if(xmlHttp.readyState == 4 && xmlHttp.status == 200){
+						var jsonBoard = JSON.parse(xmlHttp.response);
+						updateLocalBoardWithXHRBoard(that, jsonBoard);	
+						that.updateBoardUI();
+					}
+
+				}
+
+				// alert('playerid='+playerid+'&cell=' + spotId);
+				xmlHttp.send();
+
 			} else {
 				if(this.checkTie()){
 					this.declareTie();
@@ -52,27 +76,41 @@ function Board(p1, p2){
 					this.updatePlayerTurn();
 				}	
 			}
-		}
-		handleMouseClick(e){
+		},
+		handleMouseClick: function(e){
 			var spotId = e.toElement.id;
-
+			var playerid;
+			if (this.playerTurn){
+				playerid = '0';
+			} else {
+				playerid = '1';
+			}
 			var xmlHttp = new XMLHttpRequest();
 
 
 			xmlHttp.open("POST", "http://localhost:8080/", true);
 			xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
+
+			that = this;
 			xmlHttp.onreadystatechange = function(){
-				if(xmlHttp.readyState == 4 && xmlHttp.status == 200)
-					alert(xmlHttp.responseText);
+				if(xmlHttp.readyState == 4 && xmlHttp.status == 200){
+					var jsonBoard = JSON.parse(xmlHttp.response);
+					// alert(this.p1);
+					// alert(jsonBoard.p1);
+					updateLocalBoardWithXHRBoard(that, jsonBoard);	
+					that.processBoard(spotId);
+				}
+
 			}
 
-			alert('playerid=0&cell=' + spotId);
+			// alert('playerid='+playerid+'&cell=' + spotId);
 			xmlHttp.send('playerid=0&cell=' + spotId);
 		},
 		checkWin: function (){
 			// console.log('STARTING CHECKWIN');
-			arr = this.arr;
+			
+			arr = convertNullArray(this.arr);
 			x = this.myXOR;
 			if (arr.length != 9){
 				console.log('ERROR, BOARD TAMPERED WITH');
@@ -96,9 +134,14 @@ function Board(p1, p2){
 				(!arr[winConditions[i][0]] && 
 				!arr[winConditions[i][1]] && 
 				!arr[winConditions[i][2]])) && 
-				arr[winConditions[i][0]] !== undefined && 
-				arr[winConditions[i][1]] !== undefined && 
-				arr[winConditions[i][2]] !== undefined){
+				arr[winConditions[i][0]] !== null && 
+				arr[winConditions[i][1]] !== null && 
+				arr[winConditions[i][2]] !== null){
+					if(i == 1){
+						// alert(winConditions[i][0]);
+						// alert(arr[winConditions[i][0]]);
+						// alert(arr[winConditions[i][0]] !== undefined);
+					}
 					return true;
 				}
 			}
@@ -107,14 +150,14 @@ function Board(p1, p2){
 		//ONLY VALID IF CALLED AFTER CHECK WIN
 		checkTie: function(){
 			for(var i = 0; i < this.arr.length; i++){
-				if(this.arr[i] === undefined){
+				if(this.arr[i] === null){
 					return false;
 				}
 			}
 			return true;
 		},
 		declareWinner: function(){
-			if(this.playerTurn){
+			if(!this.playerTurn){
 				alert('Player 1 Wins!');
 			} else {
 				alert('Player 2 Wins!');
@@ -135,7 +178,7 @@ function Board(p1, p2){
 		},
 		//This shold call the player update method 
 		updatePlayerScore: function(){
-			if(this.playerTurn){
+			if(!this.playerTurn){
 				this.p1.wins = this.p1.wins + 1;
 				document.getElementById('P1tab').innerHTML = this.p1.name + ' Wins: ' + this.p1.wins;
 			} else {

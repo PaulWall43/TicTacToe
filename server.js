@@ -7,7 +7,10 @@ var app = express();
 var bodyParser = require('body-parser');
 var tools = require('./tools');
 
-var board = tools.Board(); //undefined
+
+var p1 = tools.Player("player1", "none", "none");
+var p2 = tools.Player("player2", "none", "none");
+var board = tools.Board(p1, p2); //undefined
 
 
 app.use(bodyParser.urlencoded({
@@ -22,33 +25,36 @@ app.get('/', function(req, res) {
 })
 
 
+app.get('/board', function(req, res){
+	app.set('json spaces', 2);
+	// res.setHeader('Contsent-Type', 'application/json');
+	res.json(board);
+})
 
-app.post('/', function(req, res){
-	//Check player id
-	var pid = req.body.playerId;
-	if(board.p1 !== undefined && board.p2 !== undefined){
-		if(pid !== '1' || pid !== '2' ){
-			res.send('Already Two Players');
-			return;
-		} else {
-			//handle the move and return something
-		}
-	} else if(board.p1 !== undefined && board.p2 === undefined){
-		board.p2 = new Player("Player2", "none", "none", false);
 
-	} else if(board.p1 === undefined){
-		board.p1 = new Player("Player1", "none", "none", true);
-		board.processMove(req.body.cell);
-		
-	}
 
-	if(newGame){
-		player1Assigned = true
-
-	}
-	
-	req.body.cell;
+app.post('/', function(req, res){	
+	board.processMove(req.body.cell);
+	console.log(board.arr);
+	res.json(board);
 })	
+
+
+app.post('/playerwin', function(req, res){
+	board.clearArr();
+	board.updatePlayerScore();
+	board.resetPlayerTurn();
+	res.json(board);
+})
+
+app.post('/playerwin', function(req, res){
+	board.clearArr();
+	board.updateTieScore();
+	board.resetPlayerTurn();
+	res.json(board);
+})
+
+
 
 app.listen(8080);
 

@@ -1,4 +1,40 @@
 module.exports = {
+  Player: function(name, img, bio, isPlayerOne){
+  return {
+    name: name, 
+    img: img, 
+    bio: bio,
+    wins: 0,
+    isPlayerOne: isPlayerOne, 
+    greeting: function (){
+      console.log(this.name + 'says hi');
+    },
+    setName: function(name){
+      this.name = name;
+      var domUpdateEvent = new CustomEvent('setName', {});
+      document.dispatchEvent(domUpdateEvent);
+    },
+    domUpdateName: function(){
+      if(this.isPlayerOne){
+        document.getElementById('P1tab').innerHTML = this.name + ' Wins: ' + this.wins; 
+      } else {
+        document.getElementById('P2tab').innerHTML = this.name + ' Wins: ' + this.wins; 
+      }
+    },
+    setUp: function() {
+      that = this;
+      document.addEventListener('setName', function(e){
+        that.domUpdateName();
+      })
+      this.domUpdateName()
+      // var myInput = document.createElement('input');
+      // myInput.addEventListener('change', function(e){
+      //   console.log(e);
+      //   that.setName(e.target.value); 
+      // })
+    }
+  }
+},
   Board: function(p1, p2){
 	var t = 5;
 	return {
@@ -29,31 +65,34 @@ module.exports = {
 			}
 		},
 		processMove: function(cell){
+			console.log(typeof cell);
 			// alert('Click was detected on board ' + id);
 			if(!this.checkValidClick(parseInt(cell))){
 				console.log('INVALID CLICK');
 				return;
 			}
 			this.updateBoardArray(parseInt(cell));
+			this.updatePlayerTurn();
 			// this.updateBoardUI(cell);
-			if(this.checkWin()){
-				// this.declareWinner();
-				this.clearArr();
-				this.updatePlayerScore();
-				this.resetPlayerTurn();
-			} else {
-				if(this.checkTie()){
-					// this.declareTie();
-					this.clearArr();
-					// this.clearBoardUI();
-					this.updateTieScore();
-					this.resetPlayerTurn();
-				} else {
-					this.updatePlayerTurn();
-				}	
-			}
+			// if(this.checkWin()){
+			// 	this.declareWinner();
+			// 	this.clearArr();
+			// 	this.updatePlayerScore();
+			// 	this.resetPlayerTurn();
+			// } else {
+			// 	if(this.checkTie()){
+			// 		this.declareTie();
+			// 		this.clearArr();
+			// 		this.clearBoardUI();
+			// 		this.updateTieScore();
+			// 		this.resetPlayerTurn();
+			// 	} else {
+			// 		this.updatePlayerTurn();
+			// 	}	
+			// }
 		},
 		handleMouseClick(e){
+			alert('IN HANDLE MOUSE CLICK');
 			var spotId = e.toElement.id;
 
 			var xmlHttp = new XMLHttpRequest();
@@ -107,7 +146,7 @@ module.exports = {
 		//ONLY VALID IF CALLED AFTER CHECK WIN
 		checkTie: function(){
 			for(var i = 0; i < this.arr.length; i++){
-				if(this.arr[i] === undefined){
+				if(this.arr[i] === null){
 					return false;
 				}
 			}
@@ -135,17 +174,17 @@ module.exports = {
 		},
 		//This shold call the player update method 
 		updatePlayerScore: function(){
-			if(this.playerTurn){
+			if(!this.playerTurn){
 				this.p1.wins = this.p1.wins + 1;
-				document.getElementById('P1tab').innerHTML = this.p1.name + ' Wins: ' + this.p1.wins;
+				
 			} else {
 				this.p2.wins = this.p2.wins + 1;
-				document.getElementById('P2tab').innerHTML =  this.p2.name + ' Wins: ' + this.p2.wins;
+	
 			}
 		},
 		updateTieScore: function(){
 			this.ties = this.ties + 1;
-			document.getElementById('Tiestab').innerHTML = 'Ties : ' + this.ties;
+			
 		},
 		resetPlayerTurn: function(){
 			this.playerTurn = true;

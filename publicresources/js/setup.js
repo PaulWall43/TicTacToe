@@ -19,8 +19,10 @@ function setUpTable(){
 }
 
 function setUpButtonListeners(board){
+	// alert(board.handleMouseClick);
 	for(var i = 0; i < 9; i++){
 		var t = i.toString();
+
 		document.getElementById(t).onclick = function(e) {
 			board.handleMouseClick(e);
 		}
