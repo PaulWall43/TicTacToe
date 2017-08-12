@@ -21,6 +21,7 @@ app.use(bodyParser.json());
 
 app.get('/', function(req, res) {
 	// res.send('Hello World');
+	console.log('SOMEBODY IS HEREEEEEEEEEEE');
 	res.sendFile(path.join(__dirname, 'index.html'));
 })
 

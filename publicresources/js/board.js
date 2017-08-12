@@ -46,11 +46,11 @@ function Board(p1, p2){
 				// this.updatePlayerScore();
 				// this.resetPlayerTurn();
 				var xmlHttp = new XMLHttpRequest();
-				xmlHttp.open("POST", "http://localhost:8080/playerwin", true);
+				xmlHttp.open("POST", "https://calm-everglades-95428.herokuapp.com/playerwin", true);
 				// if(!playerTurn)
-				// 	xmlHttp.open("POST", "http://localhost:8080/playeronewin", true);
+				// 	xmlHttp.open("POST", "https://calm-everglades-95428.herokuapp.com/playeronewin", true);
 				// else 
-				// 	xmlHttp.open("POST", "http://localhost:8080/playertwowin", true);
+				// 	xmlHttp.open("POST", "https://calm-everglades-95428.herokuapp.com/playertwowin", true);
 				xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 				that = this;
 				xmlHttp.onreadystatechange = function(){
@@ -68,10 +68,28 @@ function Board(p1, p2){
 			} else {
 				if(this.checkTie()){
 					this.declareTie();
-					this.clearArr();
+					// this.clearArr();
 					this.clearBoardUI();
-					this.updateTieScore();
-					this.resetPlayerTurn();
+					// this.updateTieScore();
+					// this.resetPlayerTurn();
+
+
+					var xmlHttp = new XMLHttpRequest();
+					xmlHttp.open("POST", "https://calm-everglades-95428.herokuapp.com/tie", true);
+					xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+					that = this;
+					xmlHttp.onreadystatechange = function(){
+						if(xmlHttp.readyState == 4 && xmlHttp.status == 200){
+							var jsonBoard = JSON.parse(xmlHttp.response);
+							updateLocalBoardWithXHRBoard(that, jsonBoard);	
+							that.updateBoardUI();
+						}
+
+					}
+
+					// alert('playerid='+playerid+'&cell=' + spotId);
+					xmlHttp.send();
+
 				} else {
 					this.updatePlayerTurn();
 				}	
@@ -88,7 +106,7 @@ function Board(p1, p2){
 			var xmlHttp = new XMLHttpRequest();
 
 
-			xmlHttp.open("POST", "http://localhost:8080/", true);
+			xmlHttp.open("POST", "https://calm-everglades-95428.herokuapp.com/", true);
 			xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
 

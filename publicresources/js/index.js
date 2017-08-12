@@ -13,7 +13,7 @@ window.onload = function(){
 	// setUpButtonListeners(board);
 
 	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "http://localhost:8080/board", true);
+	xhr.open("GET", "https://calm-everglades-95428.herokuapp.com/board", true);
 	xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
 	xhr.onreadystatechange = function(){
